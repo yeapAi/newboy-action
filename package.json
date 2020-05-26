@@ -1,0 +1,23 @@
+{
+  "name": "yeap-postboy",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yeapAi/Yeap-Postboy.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/yeapAi/Yeap-Postboy/issues"
+  },
+  "homepage": "https://github.com/yeapAi/Yeap-Postboy#readme",
+  "dependencies": {
+    "@actions/core": "^1.2.4",
+    "newman": "^5.0.1"
+  }
+}

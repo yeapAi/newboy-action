@@ -1,0 +1,10 @@
+name: 'Postboy'
+description: 'Run Postman collections via Newman'
+author: 'YeapAi'
+branding:
+  icon: 'check-square'  
+  color: 'orange'
+
+runs:
+  using: 'node12'
+  main: 'index.js'
