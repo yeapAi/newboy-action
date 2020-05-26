@@ -8,7 +8,7 @@ async function launch() {
 	console.log('-- postboy :: launch')
 	const environmentId = 'b2e74924-ef42-473c-ae4e-596f06bbac77'
 	const collectionId = '5c8d077f-8b9b-479e-8d96-ce552e8a9b23'
-	const apiKey = 'PMAK-5ebab930d8a01900377e7383-3bc36e182c3cb75a7ff70530d824cdf536'
+	const apiKey = core.get('apiKey')
 	const apiUrl = 'https://api.getpostman.com'
 	
 	const environment = `${apiUrl}/environments/${environmentId}?apikey=${apiKey}`
