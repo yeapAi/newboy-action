@@ -4,6 +4,9 @@ author: 'YeapAi'
 branding:
   icon: 'check-square'  
   color: 'orange'
+inputs:
+  apiKey:
+    description: 'Postman API key'
 runs:
   using: 'node12'
   main: 'index.js'
