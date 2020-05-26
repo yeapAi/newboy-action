@@ -1,4 +1,4 @@
-name: 'Postboy'
+name: 'postboy-action'
 description: 'Run Postman collections via Newman'
 author: 'YeapAi'
 branding:
