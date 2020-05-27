@@ -18,6 +18,9 @@
   "homepage": "https://github.com/yeapAi/Yeap-Postboy#readme",
   "dependencies": {
     "@actions/core": "^1.2.4",
-    "newman": "^5.0.1"
+    "axios": "^0.19.2",
+    "check-guid": "^1.0.2",
+    "newman": "^5.0.1",
+    "yargs": "^15.3.1"
   }
 }

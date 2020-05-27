@@ -1,4 +1,4 @@
-name: 'postboy-action'
+name: 'newboy-action'
 description: 'Run Postman collections via Newman'
 author: 'YeapAi'
 branding:
@@ -7,6 +7,11 @@ branding:
 inputs:
   apiKey:
     description: 'Postman API key'
+    required: true
+  collection:
+    description: 'Collection to use'  
+  environment: 
+    description: 'Environment to use'
 runs:
   using: 'node12'
   main: 'index.js'

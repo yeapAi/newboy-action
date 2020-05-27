@@ -1,37 +1,77 @@
 const newman = require('newman')
 const core = require('@actions/core')
+const axios = require('axios').default
+const { argv } = require('yargs')
+const { isGuid } = require('check-guid')
 
-launch()
+log = message => {
+	console.log(`-- postboy :: ${message}`)
+}
 
-async function launch() {
-	
-	console.log('-- postboy :: launch')
-	const environmentId = 'b2e74924-ef42-473c-ae4e-596f06bbac77'
-	const collectionId = '5c8d077f-8b9b-479e-8d96-ce552e8a9b23'
-	const apiKey = core.getInput('apiKey')
-	const apiUrl = 'https://api.getpostman.com'
-	
-	const environment = `${apiUrl}/environments/${environmentId}?apikey=${apiKey}`
-	const collection = `${apiUrl}/collections/${collectionId}?apikey=${apiKey}`
-	
-	const options = {
-		apiKey: `?apikey=${apiKey}`,
-		collection: collection,
-		environment: environment,
-		reporters: 'cli',
+getCollections = async (apiUrl, apiKey) => {
+	const response = await axios.get(`${apiUrl}/collections?apikey=${apiKey}`)
+	return response && response.data && response.data.collections
+}	
+
+getEnvironments = async (apiUrl, apiKey) => {
+	const response = await axios.get(`${apiUrl}/environments?apikey=${apiKey}`)
+	return response && response.data && response.data.environments
+}	
+
+getCollectionId = async (apiUrl, apiKey, criteria) => {
+	if (isGuid(criteria))
+		return Promise.resolve(criteria)
+
+	const collection = (await getCollections(apiUrl, apiKey)).filter(c => c.name == criteria)[0]
+	if (collection) {
+		return collection.id
 	}
-	
-	console.log('-- postboy :: options : ' + JSON.stringify(options));
-	
+	throw new Error(`Unable to find the collection identified by ${criteria}`)
+}
+
+getEnvironmentId = async (apiUrl, apiKey, criteria) => {
+	if (isGuid(criteria))
+		return Promise.resolve(criteria)
+
+	const environment = (await getEnvironments(apiUrl, apiKey)).filter(c => c.name == criteria)[0]
+	if (environment) {
+		return environment.id
+	}
+	throw new Error(`Unable to find the environment identified by ${criteria}`)
+}
+
+
+(async () => {
+
 	try {
+		log("Starting newboy action")
+		
+		const postmanApiUrl = 'https://api.getpostman.com'
+		const environment = core.getInput('environment') || argv.environment
+		const collection = core.getInput('collection') || argv.collection
+		const apiKey = core.getInput('apiKey') || argv.apiKey
+		
+		const collectionId = await getCollectionId(postmanApiUrl, apiKey, collection)
+		const environmentId = await getEnvironmentId(postmanApiUrl, apiKey, environment)
+		
+		log(`Collection id : ${collectionId}`)
+		log(`Environment id : ${environmentId}`)
+
+		const options = {
+			apiKey: `?apikey=${apiKey}`,
+			collection: `${postmanApiUrl}/collections/${collectionId}?apikey=${apiKey}`,
+			environment: `${postmanApiUrl}/environments/${environmentId}?apikey=${apiKey}`,
+			reporters: 'cli',
+		}
+		
 		newman.run(options).on('done', (e, summary) => {
 			if (e || summary.run.failures.length) {
-			  core.setFailed('Newman run failed!' + (e || ''))
+				core.setFailed('Newman run failed!' + (e || ''))
 			}
 		})
 	}
 	catch(e) {
-		console.log('-- postboy :: fatal error : ' + e.message)
+		log(`Exception : ${e.message}`)
 		core.setFailed(e.message)
 	}
-}
+})();

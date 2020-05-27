@@ -1,2 +1,4 @@
 # postboy-action
-Newman tests launcher
+Run Postman collections via Newman
+
+
