@@ -11,15 +11,15 @@ inputs:
   collection:
     description: 'Collection to use'
     required: true
-  forkLabel: 
+  fork_label: 
     description: 'Label of the fork of the collection to use'
     required: false
     default: ''
-  forkLabelsIgnored: 
+  fork_labels_ignored: 
     description: 'Labels of the fork the must be ignored and replaced by a blank string'
     required: false
     default: ''
-  forkLabelFailback: 
+  fork_label_failback: 
     description: 'Label of the fork that must be considered if no collection with the forkLabel exists'
     default: ''
   environment: 

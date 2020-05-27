@@ -61,9 +61,9 @@ getEnvironmentId = async (apiUrl, apiKey, name) => {
 		const postmanApiUrl = 'https://api.getpostman.com'
 		const environment = core.getInput('environment') || argv.environment
 		const collection = core.getInput('collection') || argv.collection
-		const forkLabel = core.getInput('forkLabel') || argv.forkLabel
-		const forkLabelsIgnored = core.getInput('forkLabelsIgnored') || argv.forkLabelsIgnored
-		const forkLabelFailback = core.getInput('forkLabelFailback') || argv.forkLabelFailback
+		const forkLabel = core.getInput('fork_label') || argv.forkLabel
+		const forkLabelsIgnored = core.getInput('fork_labels_ignored') || argv.forkLabelsIgnored
+		const forkLabelFailback = core.getInput('fork_label_failback') || argv.forkLabelFailback
 		const apiKey = core.getInput('apiKey') || argv.apiKey
 	
 		const fork = (forkLabelsIgnored || "").split(",").includes(forkLabel) ? "" : forkLabel;
@@ -79,7 +79,7 @@ getEnvironmentId = async (apiUrl, apiKey, name) => {
 			environment: `${postmanApiUrl}/environments/${environmentId}?apikey=${apiKey}`,
 			reporters: 'cli',
 		}
-		
+
 		newman.run(options).on('done', (e, summary) => {
 			if (e || summary.run.failures.length) {
 				core.setFailed('Newman run failed!' + (e || ''))
