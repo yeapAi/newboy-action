@@ -67,7 +67,7 @@ getEnvironmentId = async (apiUrl, apiKey, name) => {
 		const fork_label_remove_refs_heads = core.getInput('fork_label_remove_refs_heads') || argv.forkLabelRemoveRefsHeads || '1'
 		const apiKey = core.getInput('apiKey') || argv.apiKey
 		
-		const forkLabelFiltered = fork_label_remove_refs_heads == '1' ? forkLabel.replace('refs/head', '') : forkLabel
+		const forkLabelFiltered = fork_label_remove_refs_heads == '1' ? forkLabel.replace('refs/heads/', '') : forkLabel
 		const fork = (forkLabelsIgnored || "").split(",").includes(forkLabelFiltered) ? "" : forkLabelFiltered
 		
 		const collectionId = isGuid(collection) ? collection : await getCollectionId(postmanApiUrl, apiKey, collection, fork, forkLabelFailback)
