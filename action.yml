@@ -22,6 +22,9 @@ inputs:
   fork_label_failback: 
     description: 'Label of the fork that must be considered if no collection with the forkLabel exists'
     default: ''
+  fork_label_remove_refs_heads: 
+    description: 'Remove the leading string refs/heads from the fork_label'
+    default: '1'
   environment: 
     description: 'Environment to use'
     required: true

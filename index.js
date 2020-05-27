@@ -61,12 +61,15 @@ getEnvironmentId = async (apiUrl, apiKey, name) => {
 		const postmanApiUrl = 'https://api.getpostman.com'
 		const environment = core.getInput('environment') || argv.environment
 		const collection = core.getInput('collection') || argv.collection
-		const forkLabel = core.getInput('fork_label') || argv.forkLabel
-		const forkLabelsIgnored = core.getInput('fork_labels_ignored') || argv.forkLabelsIgnored
-		const forkLabelFailback = core.getInput('fork_label_failback') || argv.forkLabelFailback
+		const forkLabel = core.getInput('fork_label') || argv.forkLabel || ''
+		const forkLabelsIgnored = core.getInput('fork_labels_ignored') || argv.forkLabelsIgnored || ''
+		const forkLabelFailback = core.getInput('fork_label_failback') || argv.forkLabelFailback || ''
+		const fork_label_remove_refs_heads = core.getInput('fork_label_remove_refs_heads') || argv.forkLabelRemoveRefsHeads || '1'
 		const apiKey = core.getInput('apiKey') || argv.apiKey
-	
-		const fork = (forkLabelsIgnored || "").split(",").includes(forkLabel) ? "" : forkLabel;
+		
+		const forkLabelFiltered = fork_label_remove_refs_heads == '1' ? forkLabel.replace('refs/head', '') : forkLabel
+		const fork = (forkLabelsIgnored || "").split(",").includes(forkLabelFiltered) ? "" : forkLabelFiltered
+		
 		const collectionId = isGuid(collection) ? collection : await getCollectionId(postmanApiUrl, apiKey, collection, fork, forkLabelFailback)
 		const environmentId = isGuid(environment) ? environment : await getEnvironmentId(postmanApiUrl, apiKey, environment)
 		
