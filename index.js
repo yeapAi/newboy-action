@@ -34,8 +34,7 @@ getCollectionId = async (apiUrl, apiKey, collectionName, forkLabel, forkLabelFai
 		log(`Found the collection of name '${collectionName}' and fork '${forkLabel}'`)
 		return collection.id;
 	}
-
-	log(`Unable to find the collection of name '${collectionName}' and fork '${forkLabel} -> Failback to the fork '${forkLabelFailback}'`)
+	core.warning(`Unable to find the collection of name '${collectionName}' and fork '${forkLabel} -> Failback to the fork '${forkLabelFailback}'`)
 	const collectionFailback = getCollectionByForkLabel(collections, forkLabelFailback);
 	if (collectionFailback) {
 		log(`Found the collection of name '${collectionName}' and fork '${forkLabelFailback}'`)
