@@ -9,9 +9,22 @@ inputs:
     description: 'Postman API key'
     required: true
   collection:
-    description: 'Collection to use'  
+    description: 'Collection to use'
+    required: true
+  forkLabel: 
+    description: 'Label of the fork of the collection to use'
+    required: false
+    default: ''
+  forkLabelsIgnored: 
+    description: 'Labels of the fork the must be ignored and replaced by a blank string'
+    required: false
+    default: ''
+  forkLabelFailback: 
+    description: 'Label of the fork that must be considered if no collection with the forkLabel exists'
+    default: ''
   environment: 
     description: 'Environment to use'
+    required: true
 runs:
   using: 'node12'
   main: 'index.js'
