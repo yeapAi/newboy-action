@@ -82,11 +82,17 @@ getEnvironmentId = async (apiUrl, apiKey, name) => {
 			reporters: 'cli',
 		}
 		log(`Newman will start now`)
-		newman.run(options).on('done', (e, summary) => {
-			if (e || summary.run.failures.length) {
+		newman.run(options)
+			.on('exception' (e, summary) => {
+				log(`Exception event ${e}`)
 				core.setFailed('Newman run failed!' + (e || ''))
-			}
-		})
+			})
+			.on('done', (e, summary) => {
+				log(`Newman's work is done`)
+				if (e || summary.run.failures.length) {
+					core.setFailed('Newman run failed!' + (e || ''))
+				}
+			})
 		log(`Newman is started`)
 	}
 	catch(e) {
