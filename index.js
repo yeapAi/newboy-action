@@ -83,7 +83,7 @@ getEnvironmentId = async (apiUrl, apiKey, name) => {
 		}
 		log(`Newman will start now`)
 		newman.run(options)
-			.on('exception' (e, summary) => {
+			.on('exception', (e, summary) => {
 				log(`Exception event ${e}`)
 				core.setFailed('Newman run failed!' + (e || ''))
 			})
