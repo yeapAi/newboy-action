@@ -80,9 +80,11 @@ getEnvironmentId = async (apiUrl, apiKey, name) => {
 			collection: `${postmanApiUrl}/collections/${collectionId}?apikey=${apiKey}`,
 			environment: `${postmanApiUrl}/environments/${environmentId}?apikey=${apiKey}`,
 			reporters: 'cli',
+			verbose: true
 		}
 
-		newman.run(options).on('done', (e, summary) => {
+		newman.run(options, (e, summary) => {
+			log(`Exception : ${e.message}`)
 			if (e || summary.run.failures.length) {
 				core.setFailed('Newman run failed!' + (e || ''))
 			}
