@@ -84,6 +84,7 @@ getEnvironmentId = async (apiUrl, apiKey, name) => {
 		}
 
 		newman.run(options, (e, summary) => {
+			log(`Exception : ${e.message}`)
 			if (e || summary.run.failures.length) {
 				core.setFailed('Newman run failed!' + (e || ''))
 			}
