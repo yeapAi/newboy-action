@@ -5,7 +5,7 @@ const { argv } = require('yargs')
 const { isGuid } = require('check-guid')
 
 log = message => {
-	console.log(`-- postboy :: ${message}`)
+	console.log(`-- newboy-action :: ${message}`)
 }
 
 getCollections = async (apiUrl, apiKey) => {
@@ -75,23 +75,46 @@ getEnvironmentId = async (apiUrl, apiKey, name) => {
 		log(`Collection id : ${collectionId}`)
 		log(`Environment id : ${environmentId}`)
 
+		callbackDefaultGenerator = (eventName) => ((e, summary) => {
+			var errorMessage = (e && e.message || '')
+			if (errorMessage) {
+				core.setFailed(`Newman run failed ${eventName} : ${errorMessage}`)
+				log(`Event ${eventName} - FAIL - ${errorMessage}`)
+				log(`Newman run failed ${eventName} : ${errorMessage}`)
+				return;
+			}
+			log(`Event ${eventName} - OK`)
+		})
+
+		callbackItemGenerator = (eventName) => ((e, item) => {
+			if (e) {
+				defaultCallback(e);
+				return;
+			}
+			var itemS = JSON.stringify(item)
+			log(`Event ${eventName} - ${itemS}`)
+		})
+
 		const options = {
 			apiKey: `?apikey=${apiKey}`,
 			collection: `${postmanApiUrl}/collections/${collectionId}?apikey=${apiKey}`,
 			environment: `${postmanApiUrl}/environments/${environmentId}?apikey=${apiKey}`,
+			verbose: true,
 			reporters: 'cli',
-			verbose: true
 		}
 
-		newman.run(options, (e, summary) => {
-			log(`Exception : ${e.message}`)
-			if (e || summary.run.failures.length) {
-				core.setFailed('Newman run failed!' + (e || ''))
-			}
-		}).on('request', (e, args) => {
-		    if (!e) // Log the response body
-			log(args.response.stream.toString())
-	    	})
+		newman.run(options, callbackDefaultGenerator('main'))
+			.on('done', callbackDefaultGenerator('done'))
+			.on('beforePrerequest', callbackDefaultGenerator('beforePrerequest'))
+			.on('prerequest', callbackDefaultGenerator('prerequest'))
+			.on('beforeRequest', callbackDefaultGenerator('beforeRequest'))
+			.on('request', callbackDefaultGenerator('request'))
+			.on('beforeTest', callbackDefaultGenerator('beforeTest'))
+			.on('test', callbackDefaultGenerator('test'))
+			.on('done', callbackDefaultGenerator('done'))
+			.on('beforeItem', callbackItemGenerator('beforeItem'))
+			.on('item', callbackDefaultGenerator('item'))
+			.on('exception', callbackDefaultGenerator('exception'))
 	}
 	catch(e) {
 		log(`Exception : ${e.message}`)
