@@ -29,5 +29,5 @@ inputs:
     description: 'Environment to use'
     required: true
 runs:
-  using: 'node12'
+  using: 'node15'
   main: 'index.js'
