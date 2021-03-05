@@ -77,13 +77,19 @@ getEnvironmentId = async (apiUrl, apiKey, name) => {
 		log(`Collection uid : ${collectionUid}`)
 		log(`Environment id : ${environmentId}`)
 
-		callbackDefaultGenerator = (eventName) => ((e, summary) => {
+		callbackDefaultGenerator = (eventName) => ((e) => {
 			var errorMessage = (e && e.message || '')
 			if (errorMessage) {
 				core.setFailed(`Newman run failed ${eventName} : ${errorMessage}`)
 				log(`Event ${eventName} - FAIL - ${errorMessage}`)
 				log(`Newman run failed ${eventName} : ${errorMessage}`)
 				return;
+			}
+		})
+		
+		callbackDoneGenerator = (eventName) => ((e, summary) => {
+			if (e || summary.run.failures.length) {
+				core.setFailed('Newman run failed!' + (e || ''))
 			}
 		})
 		
@@ -105,14 +111,13 @@ getEnvironmentId = async (apiUrl, apiKey, name) => {
 		}
 
 		newman.run(options, callbackDefaultGenerator('main'))
-			.on('done', callbackDefaultGenerator('done'))
+			.on('done', callbackDoneGenerator('done'))
 			.on('beforePrerequest', callbackDefaultGenerator('beforePrerequest'))
 			.on('prerequest', callbackDefaultGenerator('prerequest'))
 			.on('beforeRequest', callbackDefaultGenerator('beforeRequest'))
 			.on('request', callbackDefaultGenerator('request'))
 			.on('beforeTest', callbackDefaultGenerator('beforeTest'))
 			.on('test', callbackDefaultGenerator('test'))
-			.on('done', callbackDefaultGenerator('done'))
 			.on('beforeItem', callbackDefaultGenerator('beforeItem'))
 			.on('item', callbackDefaultGenerator('item'))
 			.on('exception', callbackDefaultGenerator('exception'))
