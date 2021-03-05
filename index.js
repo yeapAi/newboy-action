@@ -95,11 +95,18 @@ getEnvironmentId = async (apiUrl, apiKey, name) => {
 		
 		callbackItemGenerator = (eventName) => ((e, item) => {
 			if (e) {
-				defaultCallback(e);
+				console.error(e);
 				return;
 			}
 			var itemS = JSON.stringify(item)
 			log(`Event ${eventName} - ${itemS}`)
+		})
+
+		callbackRequestGenerator = (eventName) => ((e, args) => {
+			log((args && args.response && args.response.stream.toString()) || "");
+			if (e) {
+				console.error(e);
+			}
 		})
 
 		const options = {
@@ -115,7 +122,7 @@ getEnvironmentId = async (apiUrl, apiKey, name) => {
 			.on('beforePrerequest', callbackDefaultGenerator('beforePrerequest'))
 			.on('prerequest', callbackDefaultGenerator('prerequest'))
 			.on('beforeRequest', callbackDefaultGenerator('beforeRequest'))
-			.on('request', callbackDefaultGenerator('request'))
+			.on('request', callbackRequestGenerator('request'))
 			.on('beforeTest', callbackDefaultGenerator('beforeTest'))
 			.on('test', callbackDefaultGenerator('test'))
 			.on('beforeItem', callbackDefaultGenerator('beforeItem'))
