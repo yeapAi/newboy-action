@@ -85,7 +85,6 @@ getEnvironmentId = async (apiUrl, apiKey, name) => {
 				log(`Newman run failed ${eventName} : ${errorMessage}`)
 				return;
 			}
-			log(`Event ${eventName} - OK`)
 		})
 		
 		callbackItemGenerator = (eventName) => ((e, item) => {
@@ -114,7 +113,7 @@ getEnvironmentId = async (apiUrl, apiKey, name) => {
 			.on('beforeTest', callbackDefaultGenerator('beforeTest'))
 			.on('test', callbackDefaultGenerator('test'))
 			.on('done', callbackDefaultGenerator('done'))
-			.on('beforeItem', callbackItemGenerator('beforeItem'))
+			.on('beforeItem', callbackDefaultGenerator('beforeItem'))
 			.on('item', callbackDefaultGenerator('item'))
 			.on('exception', callbackDefaultGenerator('exception'))
 	}
