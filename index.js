@@ -8,6 +8,8 @@ log = message => {
 	console.log(`-- newboy-action :: ${message}`)
 }
 
+isPostmanUid = (uid) => /^[0-9a-f]{1,10}\-[0-9a-f]{8}(\-[0-9a-f]{4}){3}\-[0-9a-f]{12}$/.test(uid);
+
 getCollections = async (apiUrl, apiKey) => {
 	const response = await axios.get(`${apiUrl}/collections?apikey=${apiKey}`)
 	return response && response.data && response.data.collections || []
@@ -18,7 +20,7 @@ getEnvironments = async (apiUrl, apiKey) => {
 	return response && response.data && response.data.environments || []
 }	
 
-getCollectionId = async (apiUrl, apiKey, collectionName, forkLabel, forkLabelFailback) => {
+getCollectionUid = async (apiUrl, apiKey, collectionName, forkLabel, forkLabelFailback) => {
 
 	const getCollectionByForkLabel = (collections, label) => 
 		label 
@@ -32,13 +34,13 @@ getCollectionId = async (apiUrl, apiKey, collectionName, forkLabel, forkLabelFai
 	const collection = getCollectionByForkLabel(collections, forkLabel);
 	if (collection) {
 		log(`Found the collection of name '${collectionName}' and fork '${forkLabel}'`)
-		return collection.id;
+		return collection.uid;
 	}
 	core.warning(`Unable to find the collection of name '${collectionName}' and fork '${forkLabel} -> Failback to the fork '${forkLabelFailback}'`)
 	const collectionFailback = getCollectionByForkLabel(collections, forkLabelFailback);
 	if (collectionFailback) {
 		log(`Found the collection of name '${collectionName}' and fork '${forkLabelFailback}'`)
-		return collectionFailback.id
+		return collectionFailback.uid
 	}
 	throw new Error(`Unable to find the collection of name '${collectionName}' and fork '${forkLabelFailback}'`)	
 }
@@ -69,13 +71,13 @@ getEnvironmentId = async (apiUrl, apiKey, name) => {
 		const forkLabelFiltered = fork_label_remove_refs_heads == '1' ? forkLabel.replace('refs/heads/', '') : forkLabel
 		const fork = (forkLabelsIgnored || "").split(",").includes(forkLabelFiltered) ? "" : forkLabelFiltered
 		
-		const collectionId = isGuid(collection) ? collection : await getCollectionId(postmanApiUrl, apiKey, collection, fork, forkLabelFailback)
+		const collectionUid = isPostmanUid(collection) ? collection : await getCollectionUid(postmanApiUrl, apiKey, collection, fork, forkLabelFailback)
 		const environmentId = isGuid(environment) ? environment : await getEnvironmentId(postmanApiUrl, apiKey, environment)
 		
-		log(`Collection id : ${collectionId}`)
+		log(`Collection uid : ${collectionUid}`)
 		log(`Environment id : ${environmentId}`)
 
-		callbackDefaultGenerator = (eventName) => ((e, summary) => {
+		callbackDefaultGenerator = (eventName) => ((e) => {
 			var errorMessage = (e && e.message || '')
 			if (errorMessage) {
 				core.setFailed(`Newman run failed ${eventName} : ${errorMessage}`)
@@ -83,36 +85,47 @@ getEnvironmentId = async (apiUrl, apiKey, name) => {
 				log(`Newman run failed ${eventName} : ${errorMessage}`)
 				return;
 			}
-			log(`Event ${eventName} - OK`)
 		})
-
+		
+		callbackDoneGenerator = (eventName) => ((e, summary) => {
+			if (e || summary.run.failures.length) {
+				core.setFailed('Newman run failed!' + (e || ''))
+			}
+		})
+		
 		callbackItemGenerator = (eventName) => ((e, item) => {
 			if (e) {
-				defaultCallback(e);
+				console.error(e);
 				return;
 			}
 			var itemS = JSON.stringify(item)
 			log(`Event ${eventName} - ${itemS}`)
 		})
 
+		callbackRequestGenerator = (eventName) => ((e, args) => {
+			log((args && args.response && args.response.stream.toString()) || "");
+			if (e) {
+				console.error(e);
+			}
+		})
+
 		const options = {
 			apiKey: `?apikey=${apiKey}`,
-			collection: `${postmanApiUrl}/collections/${collectionId}?apikey=${apiKey}`,
+			collection: `${postmanApiUrl}/collections/${collectionUid}?apikey=${apiKey}`,
 			environment: `${postmanApiUrl}/environments/${environmentId}?apikey=${apiKey}`,
 			verbose: true,
 			reporters: 'cli',
 		}
 
 		newman.run(options, callbackDefaultGenerator('main'))
-			.on('done', callbackDefaultGenerator('done'))
+			.on('done', callbackDoneGenerator('done'))
 			.on('beforePrerequest', callbackDefaultGenerator('beforePrerequest'))
 			.on('prerequest', callbackDefaultGenerator('prerequest'))
 			.on('beforeRequest', callbackDefaultGenerator('beforeRequest'))
-			.on('request', callbackDefaultGenerator('request'))
+			.on('request', callbackRequestGenerator('request'))
 			.on('beforeTest', callbackDefaultGenerator('beforeTest'))
 			.on('test', callbackDefaultGenerator('test'))
-			.on('done', callbackDefaultGenerator('done'))
-			.on('beforeItem', callbackItemGenerator('beforeItem'))
+			.on('beforeItem', callbackDefaultGenerator('beforeItem'))
 			.on('item', callbackDefaultGenerator('item'))
 			.on('exception', callbackDefaultGenerator('exception'))
 	}
